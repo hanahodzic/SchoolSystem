@@ -1,0 +1,629 @@
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+
+using namespace std;
+
+template <typename T>
+class Student {
+public:
+    T ime;
+    T prezime;
+    int brojIndexa;
+    T email;
+
+    Student(T ime, T prezime, int brojIndexa, T email) {
+        this->ime = ime;
+        this->prezime = prezime;
+        this->brojIndexa = brojIndexa;
+        this->email = email;
+    }
+};
+
+template <typename T>
+class Kurs {
+public:
+    T nazivKursa;
+    T sifraKursa;
+    T opisKursa;
+
+    Kurs(T nazivKursa, T sifraKursa, T opisKursa) {
+        this->nazivKursa = nazivKursa;
+        this->sifraKursa = sifraKursa;
+        this->opisKursa = opisKursa;
+    }
+};
+
+template <typename T>
+class Ocjena {
+public:
+    int brojIndexa;
+    T sifraKursa;
+    T ocjena;
+
+    Ocjena(int brojIndexa, T sifraKursa, T ocjena) {
+        this->brojIndexa = brojIndexa;
+        this->sifraKursa = sifraKursa;
+        this->ocjena = ocjena;
+    }
+};
+
+template <typename T>
+class Prisustvo {
+public:
+    int brojIndexa;
+    T sifraKursa;
+    int procenatPrisustva;
+
+    Prisustvo(int brojIndexa, T sifraKursa, int procenatPrisustva) {
+        this->brojIndexa = brojIndexa;
+        this->sifraKursa = sifraKursa;
+        this->procenatPrisustva = procenatPrisustva;
+    }
+};
+
+template <typename T>
+class SistemUpravljanjaEvidencijom {
+private:
+    vector<Student<T>> studenti;
+    vector<Kurs<T>> kursevi;
+    vector<Ocjena<T>> ocjene;
+    vector<Prisustvo<T>> prisustva;
+
+public:
+    void dodajStudenta(Student<T> student) {
+        studenti.push_back(student);
+        cout << "Student uspješno dodan." << endl;
+    }
+
+    void urediStudenta(int brojIndexa) {
+        bool pronadjen = false;
+        for (auto &student : studenti) {
+            if (student.brojIndexa == brojIndexa) {
+                cout << "Unesite nove podatke za studenta:" << endl;
+                cout << "Ime: ";
+                cin >> student.ime;
+                cout << "Prezime: ";
+                cin >> student.prezime;
+                cout << "Email: ";
+                cin >> student.email;
+                pronadjen = true;
+                break;
+            }
+        }
+        if (!pronadjen) {
+            cout << "Student sa brojem indeksa " << brojIndexa << " nije pronađen." << endl;
+        }
+    }
+
+    void obrisiStudenta(int brojIndexa) {
+        auto it = remove_if(studenti.begin(), studenti.end(), [brojIndexa](const Student<T> &student) {
+            return student.brojIndexa == brojIndexa;
+        });
+        if (it != studenti.end()) {
+            studenti.erase(it, studenti.end());
+            cout << "Student uspješno obrisan." << endl;
+        } else {
+            cout << "Student sa brojem indeksa " << brojIndexa << " nije pronađen." << endl;
+        }
+    }
+
+    void prikaziStudenta(int brojIndexa) {
+        bool pronadjen = false;
+        for (const auto &student : studenti) {
+            if (student.brojIndexa == brojIndexa) {
+                cout << "Podaci o studentu:" << endl;
+                cout << "Ime: " << student.ime << " " << student.prezime << endl;
+                cout << "Broj indeksa: " << student.brojIndexa << endl;
+                cout << "Email: " << student.email << endl;
+                pronadjen = true;
+                break;
+            }
+        }
+        if (!pronadjen) {
+            cout << "Student sa brojem indeksa " << brojIndexa << " nije pronađen." << endl;
+        }
+    }
+
+    void dodajKurs(Kurs<T> kurs) {
+        kursevi.push_back(kurs);
+        cout << "Kurs uspješno dodan." << endl;
+    }
+
+    void urediKurs(const T &sifraKursa) {
+        bool pronadjen = false;
+        for (auto &kurs : kursevi) {
+            if (kurs.sifraKursa == sifraKursa) {
+                cout << "Unesite nove podatke za kurs:" << endl;
+                cout << "Naziv: ";
+                cin >> kurs.nazivKursa;
+                cout << "Opis: ";
+                cin.ignore();
+                getline(cin, kurs.opisKursa);
+                pronadjen = true;
+                break;
+            }
+        }
+        if (!pronadjen) {
+            cout << "Kurs sa šifrom " << sifraKursa << " nije pronađen." << endl;
+        }
+    }
+
+    void obrisiKurs(const T &sifraKursa) {
+        auto it = remove_if(kursevi.begin(), kursevi.end(), [sifraKursa](const Kurs<T> &kurs) {
+            return kurs.sifraKursa == sifraKursa;
+        });
+        if (it != kursevi.end()) {
+            kursevi.erase(it, kursevi.end());
+            cout << "Kurs uspješno obrisan." << endl;
+        } else {
+            cout << "Kurs sa šifrom " << sifraKursa << " nije pronađen." << endl;
+        }
+    }
+
+    void prikaziKurs(const T &sifraKursa) {
+        bool pronadjen = false;
+        for (const auto &kurs : kursevi) {
+            if (kurs.sifraKursa == sifraKursa) {
+                cout << "Podaci o kursu:" << endl;
+                cout << "Naziv: " << kurs.nazivKursa << endl;
+                cout << "Šifra: " << kurs.sifraKursa << endl;
+                cout << "Opis: " << kurs.opisKursa << endl;
+                pronadjen = true;
+                break;
+            }
+        }
+        if (!pronadjen) {
+            cout << "Kurs sa šifrom " << sifraKursa << " nije pronađen." << endl;
+        }
+    }
+
+    void prikaziSveStudente() {
+        if (studenti.empty()) {
+            cout << "Nema dostupnih podataka o studentima." << endl;
+        } else {
+            cout << "Svi studenti:" << endl;
+            for (const auto &student : studenti) {
+                cout << "Ime: " << student.ime << " " << student.prezime << endl;
+                cout << "Broj indeksa: " << student.brojIndexa << endl;
+                cout << "Email: " << student.email << endl;
+                cout << "------------------" << endl;
+            }
+        }
+    }
+
+    void prikaziSveKurseve() {
+        if (kursevi.empty()) {
+            cout << "Nema dostupnih podataka o kursevima." << endl;
+        } else {
+            cout << "Svi kursevi:" << endl;
+            for (const auto &kurs : kursevi) {
+                cout << "Naziv: " << kurs.nazivKursa << endl;
+                cout << "Šifra: " << kurs.sifraKursa << endl;
+                cout << "Opis: " << kurs.opisKursa << endl;
+                cout << "------------------" << endl;
+            }
+        }
+    }
+
+    void dodajOcjenu(int brojIndexa, const T &sifraKursa, const T &ocjena) {
+        Ocjena<T> novaOcjena(brojIndexa, sifraKursa, ocjena);
+        ocjene.push_back(novaOcjena);
+        cout << "Ocjena uspješno dodana." << endl;
+    }
+
+    void urediOcjenu(int brojIndexa, const T &sifraKursa) {
+        bool pronadjen = false;
+        for (auto &ocjena : ocjene) {
+            if (ocjena.brojIndexa == brojIndexa && ocjena.sifraKursa == sifraKursa) {
+                cout << "Unesite novu ocjenu za studenta:" << endl;
+                cout << "Ocjena: ";
+                cin >> ocjena.ocjena;
+                pronadjen = true;
+                break;
+            }
+        }
+        if (!pronadjen) {
+            cout << "Ocjena za studenta sa brojem indeksa " << brojIndexa << " i šifrom kursa " << sifraKursa << " nije pronađena." << endl;
+        }
+    }
+
+    void obrisiOcjenu(int brojIndexa, const T &sifraKursa) {
+        auto it = remove_if(ocjene.begin(), ocjene.end(), [brojIndexa, sifraKursa](const Ocjena<T> &ocjena) {
+            return ocjena.brojIndexa == brojIndexa && ocjena.sifraKursa == sifraKursa;
+        });
+        if (it != ocjene.end()) {
+            ocjene.erase(it, ocjene.end());
+            cout << "Ocjena uspješno obrisana." << endl;
+        } else {
+            cout << "Ocjena za studenta sa brojem indeksa " << brojIndexa << " i šifrom kursa " << sifraKursa << " nije pronađena." << endl;
+        }
+    }
+
+    void prikaziOcjene(int brojIndexa) {
+        bool pronadjen = false;
+        cout << "Ocjene studenta sa brojem indeksa " << brojIndexa << ":" << endl;
+        for (const auto &ocjena : ocjene) {
+            if (ocjena.brojIndexa == brojIndexa) {
+                cout << "Šifra kursa: " << ocjena.sifraKursa << endl;
+                cout << "Ocjena: " << ocjena.ocjena << endl;
+                cout << "------------------" << endl;
+                pronadjen = true;
+            }
+        }
+        if (!pronadjen) {
+            cout << "Ocjene za studenta sa brojem indeksa " << brojIndexa << " nisu pronađene." << endl;
+        }
+    }
+
+    void dodajPrisustvo(int brojIndexa, const T &sifraKursa, int procenatPrisustva) {
+        Prisustvo<T> novoPrisustvo(brojIndexa, sifraKursa, procenatPrisustva);
+        prisustva.push_back(novoPrisustvo);
+        cout << "Prisustvo uspješno dodano." << endl;
+    }
+
+    void urediPrisustvo(int brojIndexa, const T &sifraKursa) {
+        bool pronadjen = false;
+        for (auto &prisustvo : prisustva) {
+            if (prisustvo.brojIndexa == brojIndexa && prisustvo.sifraKursa == sifraKursa) {
+                cout << "Unesite novi procenat prisustva za studenta:" << endl;
+                cout << "Procenat prisustva: ";
+                cin >> prisustvo.procenatPrisustva;
+                pronadjen = true;
+                break;
+            }
+        }
+        if (!pronadjen) {
+            cout << "Prisustvo za studenta sa brojem indeksa " << brojIndexa << " i šifrom kursa " << sifraKursa << " nije pronađeno." << endl;
+        }
+    }
+
+    void obrisiPrisustvo(int brojIndexa, const T &sifraKursa) {
+        auto it = remove_if(prisustva.begin(), prisustva.end(), [brojIndexa, sifraKursa](const Prisustvo<T> &prisustvo) {
+            return prisustvo.brojIndexa == brojIndexa && prisustvo.sifraKursa == sifraKursa;
+        });
+        if (it != prisustva.end()) {
+            prisustva.erase(it, prisustva.end());
+            cout << "Prisustvo uspješno obrisano." << endl;
+        } else {
+            cout << "Prisustvo za studenta sa brojem indeksa " << brojIndexa << " i šifrom kursa " << sifraKursa << " nije pronađeno." << endl;
+        }
+    }
+
+    void prikaziPrisustvo(int brojIndexa) {
+        bool pronadjen = false;
+        cout << "Prisustva studenta sa brojem indeksa " << brojIndexa << ":" << endl;
+        for (const auto &prisustvo : prisustva) {
+            if (prisustvo.brojIndexa == brojIndexa) {
+                cout << "Šifra kursa: " << prisustvo.sifraKursa << endl;
+                cout << "Procenat prisustva: " << prisustvo.procenatPrisustva << "%" << endl;
+                cout << "------------------" << endl;
+                pronadjen = true;
+            }
+        }
+        if (!pronadjen) {
+            cout << "Prisustva za studenta sa brojem indeksa " << brojIndexa << " nisu pronađena." << endl;
+        }
+    }
+
+    void spremiPodatke(const T &filename) {
+        ofstream file(filename);
+        if (file.is_open()) {
+            file << studenti.size() << endl;
+            for (const auto &student : studenti) {
+                file << student.ime << endl;
+                file << student.prezime << endl;
+                file << student.brojIndexa << endl;
+                file << student.email << endl;
+            }
+            file << kursevi.size() << endl;
+            for (const auto &kurs : kursevi) {
+                file << kurs.nazivKursa << endl;
+                file << kurs.sifraKursa << endl;
+                file << kurs.opisKursa << endl;
+            }
+            file << ocjene.size() << endl;
+            for (const auto &ocjena : ocjene) {
+                file << ocjena.brojIndexa << endl;
+                file << ocjena.sifraKursa << endl;
+                file << ocjena.ocjena << endl;
+            }
+            file << prisustva.size() << endl;
+            for (const auto &prisustvo : prisustva) {
+                file << prisustvo.brojIndexa << endl;
+                file << prisustvo.sifraKursa << endl;
+                file << prisustvo.procenatPrisustva << endl;
+            }
+            file.close();
+            cout << "Podaci uspješno spremljeni u datoteku." << endl;
+        } else {
+            cout << "Greška pri otvaranju datoteke." << endl;
+        }
+    }
+
+    void ucitajPodatke(const T &filename) {
+        ifstream file(filename);
+        if (file.is_open()) {
+            size_t size;
+            string line;
+            studenti.clear();
+            kursevi.clear();
+            ocjene.clear();
+            prisustva.clear();
+            
+            // ucitaj studente
+            file >> size;
+            file.ignore(); 
+            for (size_t i = 0; i < size; ++i) {
+                T ime, prezime, email;
+                int brojIndexa;
+                getline(file, ime);
+                getline(file, prezime);
+                file >> brojIndexa;
+                file.ignore(); // Ignore the newline after brojIndexa
+                getline(file, email);
+                studenti.emplace_back(ime, prezime, brojIndexa, email);
+            }
+            
+            // ucitaj kurseve
+            file >> size;
+            file.ignore(); 
+            for (size_t i = 0; i < size; ++i) {
+                T nazivKursa, sifraKursa, opisKursa;
+                getline(file, nazivKursa);
+                getline(file, sifraKursa);
+                getline(file, opisKursa);
+                kursevi.emplace_back(nazivKursa, sifraKursa, opisKursa);
+            }
+            
+            // ucitati ocjene
+            file >> size;
+            file.ignore(); 
+            for (size_t i = 0; i < size; ++i) {
+                int brojIndexa;
+                T sifraKursa, ocjena;
+                file >> brojIndexa;
+                file.ignore(); 
+                getline(file, sifraKursa);
+                getline(file, ocjena);
+                ocjene.emplace_back(brojIndexa, sifraKursa, ocjena);
+            }
+            
+            // ucitaj prisustvo
+            file >> size;
+            file.ignore(); 
+            for (size_t i = 0; i < size; ++i) {
+                int brojIndexa, procenatPrisustva;
+                T sifraKursa;
+                file >> brojIndexa;
+                file.ignore();
+                getline(file, sifraKursa);
+                file >> procenatPrisustva;
+                file.ignore(); 
+                prisustva.emplace_back(brojIndexa, sifraKursa, procenatPrisustva);
+            }
+            
+            file.close();
+            cout << "Podaci uspješno učitani iz datoteke." << endl;
+        } else {
+            cout << "Greška pri otvaranju datoteke." << endl;
+        }
+    }
+};
+
+int main() {
+    SistemUpravljanjaEvidencijom<string> sistem;
+
+    int izbor;
+    do {
+        cout << "\n--- Sistem upravljanja evidencijom ---\n";
+        cout << "1. Dodaj studenta\n";
+        cout << "2. Uredi studenta\n";
+        cout << "3. Obriši studenta\n";
+        cout << "4. Prikaži studenta\n";
+        cout << "5. Dodaj kurs\n";
+        cout << "6. Uredi kurs\n";
+        cout << "7. Obriši kurs\n";
+        cout << "8. Prikaži kurs\n";
+        cout << "9. Prikaži sve studente\n";
+        cout << "10. Prikaži sve kurseve\n";
+        cout << "11. Dodaj ocjenu\n";
+        cout << "12. Uredi ocjenu\n";
+        cout << "13. Obriši ocjenu\n";
+        cout << "14. Prikaži ocjene\n";
+        cout << "15. Dodaj prisustvo\n";
+        cout << "16. Uredi prisustvo\n";
+        cout << "17. Obriši prisustvo\n";
+        cout << "18. Prikaži prisustvo\n";
+        cout << "19. Spremi podatke\n";
+        cout << "20. Učitaj podatke\n";
+        cout << "21. Izlaz\n";
+        cout << "Izbor: ";
+        cin >> izbor;
+
+        switch (izbor) {
+            case 1: {
+                string ime, prezime, email;
+                int brojIndexa;
+                cout << "Unesite ime: ";
+                cin >> ime;
+                cout << "Unesite prezime: ";
+                cin >> prezime;
+                cout << "Unesite broj indeksa: ";
+                cin >> brojIndexa;
+                cout << "Unesite email: ";
+                cin >> email;
+                sistem.dodajStudenta(Student<string>(ime, prezime, brojIndexa, email));
+                break;
+            }
+            case 2: {
+                int brojIndexa;
+                cout << "Unesite broj indeksa studenta za urediti: ";
+                cin >> brojIndexa;
+                sistem.urediStudenta(brojIndexa);
+                break;
+            }
+            case 3: {
+                int brojIndexa;
+                cout << "Unesite broj indeksa studenta za obrisati: ";
+                cin >> brojIndexa;
+                sistem.obrisiStudenta(brojIndexa);
+                break;
+            }
+            case 4: {
+                int brojIndexa;
+                cout << "Unesite broj indeksa studenta za prikazati: ";
+                cin >> brojIndexa;
+                sistem.prikaziStudenta(brojIndexa);
+                break;
+            }
+            case 5: {
+                string nazivKursa, sifraKursa, opisKursa;
+                cout << "Unesite naziv kursa: ";
+                cin >> nazivKursa;
+                cout << "Unesite šifru kursa: ";
+                cin >> sifraKursa;
+                cout << "Unesite opis kursa: ";
+                cin.ignore();
+                getline(cin, opisKursa);
+                sistem.dodajKurs(Kurs<string>(nazivKursa, sifraKursa, opisKursa));
+                break;
+            }
+            case 6: {
+                string sifraKursa;
+                cout << "Unesite šifru kursa za urediti: ";
+                cin >> sifraKursa;
+                sistem.urediKurs(sifraKursa);
+                break;
+            }
+            case 7: {
+                string sifraKursa;
+                cout << "Unesite šifru kursa za obrisati: ";
+                cin >> sifraKursa;
+                sistem.obrisiKurs(sifraKursa);
+                break;
+            }
+            case 8: {
+                string sifraKursa;
+                cout << "Unesite šifru kursa za prikazati: ";
+                cin >> sifraKursa;
+                sistem.prikaziKurs(sifraKursa);
+                break;
+            }
+            case 9: {
+                sistem.prikaziSveStudente();
+                break;
+            }
+            case 10: {
+                sistem.prikaziSveKurseve();
+                break;
+            }
+            case 11: {
+                int brojIndexa;
+                string sifraKursa, ocjena;
+                cout << "Unesite broj indeksa studenta: ";
+                cin >> brojIndexa;
+                cout << "Unesite šifru kursa: ";
+                cin >> sifraKursa;
+                cout << "Unesite ocjenu: ";
+                cin >> ocjena;
+                sistem.dodajOcjenu(brojIndexa, sifraKursa, ocjena);
+                break;
+            }
+            case 12: {
+                int brojIndexa;
+                string sifraKursa;
+                cout << "Unesite broj indeksa studenta: ";
+                cin >> brojIndexa;
+                cout << "Unesite šifru kursa: ";
+                cin >> sifraKursa;
+                sistem.urediOcjenu(brojIndexa, sifraKursa);
+                break;
+            }
+            case 13: {
+                int brojIndexa;
+                string sifraKursa;
+                cout << "Unesite broj indeksa studenta: ";
+                cin >> brojIndexa;
+                cout << "Unesite šifru kursa: ";
+                cin >> sifraKursa;
+                sistem.obrisiOcjenu(brojIndexa, sifraKursa);
+                break;
+            }
+            case 14: {
+                int brojIndexa;
+                cout << "Unesite broj indeksa studenta: ";
+                cin >> brojIndexa;
+                sistem.prikaziOcjene(brojIndexa);
+                break;
+            }
+            case 15: {
+                int brojIndexa, procenatPrisustva;
+                string sifraKursa;
+                cout << "Unesite broj indeksa studenta: ";
+                cin >> brojIndexa;
+                cout << "Unesite šifru kursa: ";
+                cin >> sifraKursa;
+                cout << "Unesite procenat prisustva: ";
+                cin >> procenatPrisustva;
+                sistem.dodajPrisustvo(brojIndexa, sifraKursa, procenatPrisustva);
+                break;
+            }
+            case 16: {
+                int brojIndexa;
+                string sifraKursa;
+                cout << "Unesite broj indeksa studenta: ";
+                cin >> brojIndexa;
+                cout << "Unesite šifru kursa: ";
+                cin >> sifraKursa;
+                sistem.urediPrisustvo(brojIndexa, sifraKursa);
+                break;
+            }
+            case 17: {
+                int brojIndexa;
+                string sifraKursa;
+                cout << "Unesite broj indeksa studenta: ";
+                cin >> brojIndexa;
+                cout << "Unesite šifru kursa: ";
+                cin >> sifraKursa;
+                sistem.obrisiPrisustvo(brojIndexa, sifraKursa);
+                break;
+            }
+            case 18: {
+                int brojIndexa;
+                cout << "Unesite broj indeksa studenta: ";
+                cin >> brojIndexa;
+                sistem.prikaziPrisustvo(brojIndexa);
+                break;
+            }
+            case 19: {
+                string filename;
+                cout << "Unesite ime datoteke za spremanje: ";
+                cin >> filename;
+                sistem.spremiPodatke(filename);
+                break;
+            }
+            case 20: {
+                string filename;
+                cout << "Unesite ime datoteke za učitavanje: ";
+                cin >> filename;
+                sistem.ucitajPodatke(filename);
+                break;
+            }
+            case 21: {
+                cout << "Izlaz iz programa." << endl;
+                break;
+            }
+            default: {
+                cout << "Nepoznata opcija. Pokušajte ponovo." << endl;
+                break;
+            }
+        }
+    } while (izbor != 21);
+
+    return 0;
+}
